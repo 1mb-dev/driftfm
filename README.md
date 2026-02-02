@@ -2,35 +2,108 @@
 
 Mood radio you host yourself.
 
-Drop in your mp3s, tag them by mood, hit play. Continuous, shuffled playback with weighted playlists. No accounts, no tracking, no frameworks.
+Drop in your mp3s, tag them by mood, hit play. Continuous shuffled playback per mood. No accounts, no tracking, no frameworks.
 
 **Stack:** Go + SQLite + vanilla JS
-
-**Live demo:** [drift.1mb.dev](https://drift.1mb.dev)
 
 ---
 
 ## Quick Start
 
 ```bash
-# Build
-make build
+# 1. Initialize the database
+make db-init
 
-# Import your music (interactive — assigns mood per track)
-./scripts/import-tracks.sh /path/to/your/music
+# 2. Import your music (interactive — pick mood per batch)
+make import-batch ARGS="/path/to/your/music"
 
-# Run
+# 3. Run
 make run
 # → http://localhost:8080
 ```
 
-## How It Works
+---
 
-1. **You provide the music.** Drop mp3 files into `audio/tracks/` or use the import script.
-2. **Tag by mood.** Each track gets a mood (focus, calm, energize, late_night) and optional metadata.
-3. **Hit play.** The player serves continuous, weighted-shuffle playlists per mood. No gaps.
+## End-to-End Workflow
 
-The player is a single-page vanilla JS app. No build step, no npm, no React. The backend is a single Go binary with SQLite. Deploy anywhere.
+### 1. Set Up
+
+```bash
+git clone https://github.com/1mb-dev/driftfm.git
+cd driftfm
+make db-init
+```
+
+Prerequisites: Go 1.25+, SQLite3 CLI, ffmpeg/ffprobe (for audio import and normalization).
+
+### 2. Add Content
+
+**Option A — Batch import (recommended):**
+
+```bash
+# Import a directory of MP3s — prompts for mood selection
+make import-batch ARGS="/path/to/focus-tracks"
+```
+
+**Option B — Single track with metadata:**
+
+```bash
+make import FILE=song.mp3 MOOD=focus
+```
+
+The import script (`scripts/import-track.sh`) supports additional flags:
+
+```bash
+# Full metadata example
+./scripts/import-track.sh song.mp3 \
+  --mood calm \
+  --title "Ocean Waves" \
+  --artist "Your Name" \
+  --energy low \
+  --bpm 72 \
+  --intensity 8 \
+  --time evening
+```
+
+Run `./scripts/import-track.sh --help` for all options.
+
+### 3. Normalize Audio (Optional)
+
+Normalize loudness across your library for consistent playback:
+
+```bash
+# Single file
+make normalize FILE=audio/tracks/a/ocean-waves-001a.mp3
+
+# Batch (all files in a directory)
+./scripts/normalize-batch.sh audio/tracks/
+```
+
+### 4. Run the Server
+
+```bash
+make run
+# → http://localhost:8080
+```
+
+Or build a binary:
+
+```bash
+make build
+./bin/server
+```
+
+### 5. Update the Database
+
+After adding new tracks or modifying the schema:
+
+```bash
+# Run pending migrations
+make db-migrate
+
+# Re-initialize from scratch (destructive)
+make db-init
+```
 
 ---
 
@@ -43,65 +116,46 @@ The player is a single-page vanilla JS app. No build step, no npm, no React. The
 | **energize** | Upbeat, driving, anthemic | Morning, exercise |
 | **late_night** | Chillwave, lo-fi, nocturnal | Late sessions, unwinding |
 
-You can add custom moods by editing the configuration.
-
 ---
 
-## Import Your Music
+## Make Targets
 
-### Quick Import
-
-```bash
-# Interactive: walks through each file, you pick the mood
-./scripts/import-tracks.sh /path/to/music/
-
-# Batch: assign all files in a directory to one mood
-./scripts/import-tracks.sh /path/to/focus-tracks/ --mood focus
 ```
+Development:
+  make build          Build the server binary
+  make run            Run the server (localhost:8080)
+  make dev            Run with hot reload (requires air)
+  make test           Run all tests
+  make clean          Remove build artifacts
 
-### Manual Import
+Code Quality:
+  make check          Full quality gate (fmt, vet, lint, test)
+  make fmt            Format code
+  make vet            Run go vet
+  make lint           Run linter (requires golangci-lint)
 
-```bash
-# Copy files to the tracks directory
-cp my-track.mp3 audio/tracks/
+Setup & Database:
+  make setup          Create data/ and audio/ directories
+  make db-init        Initialize SQLite database
+  make db-migrate     Run pending migrations
 
-# Import into database with metadata
-sqlite3 data/inventory.db "INSERT INTO tracks (title, mood, file_path, energy, status) VALUES ('My Track', 'focus', 'tracks/my-track.mp3', 'medium', 'approved');"
+Audio:
+  make import FILE=<path> MOOD=<mood>   Import single track
+  make import-batch ARGS=<dir>          Import directory of tracks
+  make normalize FILE=<path>            Normalize audio file
 ```
-
-### Track Requirements
-
-- **Format:** MP3 (128-320 kbps)
-- **Duration:** 1-10 minutes recommended
-- **Naming:** Lowercase, hyphens, no spaces (e.g., `morning-coffee.mp3`)
 
 ---
 
 ## Configuration
 
-Environment variables (or `.env` file):
+Environment variables override `config.yaml` values (see `.env.example`):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | `8080` | Server port |
 | `DB_PATH` | `data/inventory.db` | SQLite database path |
-| `AUDIO_DIR` | `audio/tracks` | Local audio directory |
-| `AUDIO_STORE_TYPE` | `local` | `local` or `s3` for cloud storage |
-
-For S3/R2 cloud storage, see [deploy/README.md](deploy/README.md).
-
----
-
-## Development
-
-```bash
-make build          # Build binary
-make run            # Run server (localhost:8080)
-make test           # Run tests
-make fmt            # Format code
-make lint           # Lint check
-make check          # Full quality gate (fmt, vet, lint, test)
-```
+| `AUDIO_STORE_LOCAL_PATH` | `audio` | Local audio directory |
 
 ---
 
@@ -110,21 +164,19 @@ make check          # Full quality gate (fmt, vet, lint, test)
 ### Bare Metal / VPS
 
 ```bash
-make build-linux                    # Cross-compile for Linux
-scp bin/server-linux user@host:/opt/driftfm/bin/server
-# Set up systemd service (see deploy/driftfm.service)
+# Build for Linux
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/server ./cmd/server
+
+# Copy to your server:
+scp -r bin/server web/ config.yaml scripts/ user@host:/opt/driftfm/
+
+# On the server:
+mkdir -p /opt/driftfm/data /opt/driftfm/audio/tracks
+sqlite3 /opt/driftfm/data/inventory.db < /opt/driftfm/scripts/migrations/schema.sql
+PORT=8080 /opt/driftfm/server
 ```
 
-### Docker
-
-```bash
-docker build -t driftfm .
-docker run -p 8080:8080 -v ./audio:/app/audio -v ./data:/app/data driftfm
-```
-
-### With Reverse Proxy (Caddy)
-
-See [deploy/README.md](deploy/README.md) for Caddy + TLS setup.
+For production, put a reverse proxy (Caddy, nginx) in front for TLS and set up a systemd unit for process management.
 
 ---
 
@@ -134,7 +186,7 @@ See [deploy/README.md](deploy/README.md) for Caddy + TLS setup.
 |----------|-------------|
 | `GET /api/moods` | List moods with track counts |
 | `GET /api/moods/:mood/playlist` | Shuffled playlist for mood |
-| `POST /api/tracks/:id/play` | Record play event |
+| `POST /api/tracks/:id/play` | Record listen event |
 | `GET /health` | Health check |
 | `GET /ready` | Readiness probe |
 
@@ -145,15 +197,13 @@ See [deploy/README.md](deploy/README.md) for Caddy + TLS setup.
 ```
 Browser ←→ Go server ←→ SQLite
               ↓
-         Audio files (local or S3/R2)
+         audio/tracks/
 ```
 
 - **Backend:** Single Go binary, net/http, no framework
 - **Database:** SQLite with WAL mode (pure Go driver, no CGO)
 - **Frontend:** Vanilla JS, CSS variables, Web Audio API
-- **Audio:** Local filesystem or S3-compatible storage (R2, MinIO)
-
-See [docs/architecture.md](docs/architecture.md) for details.
+- **Audio:** Local filesystem (`audio/tracks/`)
 
 ---
 
