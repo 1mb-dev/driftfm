@@ -1,0 +1,17 @@
+# Drift FM Configuration
+#
+# Override with config.local.yaml (gitignored) or environment variables.
+# Load order: defaults → config.yaml → config.local.yaml → env vars
+
+server:
+  port: 8080
+  read_timeout: 15s
+  write_timeout: 15s
+  shutdown_timeout: 30s
+
+database:
+  path: data/inventory.db
+
+audio:
+  # Local directory for audio files (relative to working directory)
+  local_path: audio
