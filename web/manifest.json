@@ -1,0 +1,60 @@
+{
+  "id": "/",
+  "name": "Drift FM",
+  "short_name": "Drift FM",
+  "lang": "en",
+  "dir": "ltr",
+  "description": "Ambient mood radio. Pick a mood. Let it drift.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["music", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "Focus",
+      "short_name": "Focus",
+      "description": "Start Focus radio",
+      "url": "/?mood=focus"
+    },
+    {
+      "name": "Calm",
+      "short_name": "Calm",
+      "description": "Start Calm radio",
+      "url": "/?mood=calm"
+    },
+    {
+      "name": "Late Night",
+      "short_name": "Late Night",
+      "description": "Start Late Night radio",
+      "url": "/?mood=late_night"
+    },
+    {
+      "name": "Energize",
+      "short_name": "Energize",
+      "description": "Start Energize radio",
+      "url": "/?mood=energize"
+    }
+  ]
+}

@@ -1,0 +1,304 @@
+/* ==========================================================================
+   Mood Space Component
+   Transform buttons into immersive spaces you enter
+   ========================================================================== */
+
+/* Breathing animation - subtle ambient pulse (inner wrapper in galaxy mode, outer in flow) */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+}
+
+/* Expansion animation - mood fills viewport */
+@keyframes expand-to-fill {
+  0% {
+    transform: scale(1);
+    border-radius: var(--radius-xl);
+    z-index: 1;
+  }
+  100% {
+    transform: scale(5);
+    border-radius: 0;
+    z-index: 100;
+    opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   Base Mood Space
+   ========================================================================== */
+
+.mood-space {
+  position: relative;
+  width: var(--mood-size-mobile);
+  height: var(--mood-size-mobile);
+  border-radius: var(--radius-xl);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-on-accent);
+  padding: var(--space-2);
+
+  /* Breathing animation (flow layout fallback) */
+  animation: breathe var(--duration-ambient) ease-in-out infinite;
+
+  /* Smooth transitions for hover */
+  transition: box-shadow var(--duration-fast) var(--ease-out),
+              opacity var(--duration-fast) var(--ease-out);
+}
+
+/* ==========================================================================
+   Galaxy Mode (positioned layout)
+   Orbs absolutely positioned by JS, CSS handles subtle drift animation.
+   Co-prime durations ensure patterns never repeat visibly.
+   ========================================================================== */
+
+/* Subtle orbital drift — each orb gets a unique path via nth-child */
+@keyframes orb-drift-1 {
+  0%, 100% { translate: 0 0; }
+  25% { translate: 6px -8px; }
+  50% { translate: -4px 5px; }
+  75% { translate: 7px 3px; }
+}
+@keyframes orb-drift-2 {
+  0%, 100% { translate: 0 0; }
+  33% { translate: -7px -5px; }
+  66% { translate: 5px 7px; }
+}
+@keyframes orb-drift-3 {
+  0%, 100% { translate: 0 0; }
+  20% { translate: 8px 4px; }
+  50% { translate: -5px -7px; }
+  80% { translate: -3px 6px; }
+}
+@keyframes orb-drift-4 {
+  0%, 100% { translate: 0 0; }
+  30% { translate: -6px 7px; }
+  70% { translate: 4px -5px; }
+}
+@keyframes orb-drift-5 {
+  0%, 100% { translate: 0 0; }
+  40% { translate: 7px -3px; }
+  60% { translate: -8px 4px; }
+}
+@keyframes orb-drift-6 {
+  0%, 100% { translate: 0 0; }
+  25% { translate: -4px -6px; }
+  50% { translate: 6px 3px; }
+  75% { translate: -3px 8px; }
+}
+
+.mood-galaxy--positioned .mood-space {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--orb-size, var(--mood-size-mobile));
+  height: var(--orb-size, var(--mood-size-mobile));
+  /* JS sets base transform for positioning; CSS translate adds drift on top */
+  transition: box-shadow var(--duration-fast) var(--ease-out),
+              opacity var(--duration-fast) var(--ease-out);
+  will-change: translate;
+}
+
+/* Each orb drifts with a unique co-prime duration */
+.mood-galaxy--positioned .mood-space:nth-child(2) { animation: orb-drift-1 23s ease-in-out infinite; }
+.mood-galaxy--positioned .mood-space:nth-child(3) { animation: orb-drift-2 29s ease-in-out infinite; }
+.mood-galaxy--positioned .mood-space:nth-child(4) { animation: orb-drift-3 31s ease-in-out infinite; }
+.mood-galaxy--positioned .mood-space:nth-child(5) { animation: orb-drift-4 37s ease-in-out infinite; }
+.mood-galaxy--positioned .mood-space:nth-child(6) { animation: orb-drift-5 41s ease-in-out infinite; }
+.mood-galaxy--positioned .mood-space:nth-child(7) { animation: orb-drift-6 43s ease-in-out infinite; }
+
+/* Inner wrapper: carries breathing animation */
+.mood-space__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.mood-galaxy--positioned .mood-space__inner {
+  animation: breathe var(--duration-ambient) ease-in-out infinite;
+}
+
+/* ==========================================================================
+   Mood Colors
+   ========================================================================== */
+
+.mood-space[data-mood="focus"] {
+  background: linear-gradient(135deg, var(--color-focus) 0%, var(--color-focus-dim) 100%);
+}
+
+.mood-space[data-mood="calm"] {
+  background: linear-gradient(135deg, var(--color-calm) 0%, var(--color-calm-dim) 100%);
+  animation-duration: 6s; /* Slower breathing for calm */
+}
+
+.mood-space[data-mood="late_night"] {
+  background: linear-gradient(135deg, var(--color-late-night) 0%, var(--color-late-night-dim) 100%);
+  animation-duration: 5s;
+}
+
+.mood-space[data-mood="energize"] {
+  background: linear-gradient(135deg, var(--color-energize) 0%, var(--color-energize-dim) 100%);
+  animation-duration: 3s; /* Faster breathing for energize */
+}
+
+/* Galaxy mode: breathing durations move to inner wrapper */
+.mood-galaxy--positioned .mood-space[data-mood="calm"] .mood-space__inner {
+  animation-duration: 6s;
+}
+
+.mood-galaxy--positioned .mood-space[data-mood="late_night"] .mood-space__inner {
+  animation-duration: 5s;
+}
+
+.mood-galaxy--positioned .mood-space[data-mood="energize"] .mood-space__inner {
+  animation-duration: 3s;
+}
+
+/* ==========================================================================
+   Play Icon Overlay
+   ========================================================================== */
+
+.mood-space::after {
+  content: '▶';
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: var(--text-xl);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+  pointer-events: none;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  color: var(--color-on-accent);
+}
+
+/* ==========================================================================
+   Hover / Focus States
+   ========================================================================== */
+
+.mood-space:hover,
+.mood-space:focus-visible {
+  box-shadow: var(--shadow-glow);
+  animation-play-state: paused; /* Pause breathing on hover (non-physics) */
+  transform: scale(1.08); /* Lift effect (non-physics fallback) */
+}
+
+/* In galaxy mode, pause drift on hover (JS inline transform takes precedence) */
+.mood-galaxy--positioned .mood-space:hover,
+.mood-galaxy--positioned .mood-space:focus-visible {
+  animation-play-state: paused;
+}
+
+/* In galaxy mode, pause inner wrapper breathing on hover */
+.mood-galaxy--positioned .mood-space:hover .mood-space__inner,
+.mood-galaxy--positioned .mood-space:focus-visible .mood-space__inner {
+  animation-play-state: paused;
+}
+
+.mood-space:hover .mood-space__inner,
+.mood-space:focus-visible .mood-space__inner {
+  transform: translateY(15%);
+}
+
+.mood-space:hover::after,
+.mood-space:focus-visible::after {
+  opacity: 0.9;
+}
+
+/* Active press state */
+.mood-space:active {
+  opacity: 0.9;
+}
+
+/* ==========================================================================
+   Expansion State
+   ========================================================================== */
+
+.mood-space--expanding {
+  animation: expand-to-fill var(--duration-normal) var(--ease-out) forwards;
+  pointer-events: none;
+  z-index: 100;
+  transform-origin: center center;
+}
+
+.mood-space--expanding .mood-space__inner {
+  animation: none;
+}
+
+.mood-space--expanding::after {
+  opacity: 0;
+}
+
+/* ==========================================================================
+   Inactive Dimming
+   When a mood is being selected, dim the others
+   ========================================================================== */
+
+.mood-galaxy--selecting .mood-space:not(.mood-space--expanding) {
+  opacity: 0.3;
+  pointer-events: none;
+  animation-play-state: paused;
+}
+
+.mood-galaxy--selecting .mood-space:not(.mood-space--expanding) .mood-space__inner {
+  animation-play-state: paused;
+}
+
+/* ==========================================================================
+   Responsive (non-physics fallback sizing)
+   ========================================================================== */
+
+/* Tablet */
+@media (min-width: 768px) {
+  .mood-space {
+    width: var(--mood-size-tablet);
+    height: var(--mood-size-tablet);
+    font-size: var(--text-lg);
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .mood-space {
+    width: var(--mood-size-desktop);
+    height: var(--mood-size-desktop);
+  }
+}
+
+/* ==========================================================================
+   Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .mood-space,
+  .mood-galaxy--positioned .mood-space {
+    animation: none;
+  }
+
+  .mood-space__inner,
+  .mood-galaxy--positioned .mood-space__inner {
+    animation: none;
+  }
+
+  .mood-space--expanding {
+    animation: none;
+    opacity: 0;
+  }
+}

@@ -1,0 +1,604 @@
+/* Drift FM - Main Styles */
+/* Component-specific styles in components/*.css */
+
+/* ==========================================================================
+   Splash Screen
+   Branded loading overlay — dissolved when app is ready
+   ========================================================================== */
+
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  transition: opacity var(--duration-slow) var(--ease-out),
+              visibility 0s var(--duration-slow);
+}
+
+.app--loaded .splash {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.splash__brand {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.splash__logo {
+  width: 100px;
+  height: auto;
+  animation: splash-breathe var(--duration-ambient) var(--ease-in-out) infinite;
+}
+
+.splash__title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  opacity: 0.8;
+}
+
+@keyframes splash-breathe {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* Mood-aware glow behind splash logo (return visits) */
+html[data-splash-mood] .splash__brand::before {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 15%, transparent), transparent 70%);
+  z-index: -1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash__logo {
+    animation: none;
+  }
+
+  .splash {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+   App Layout
+   ========================================================================== */
+
+.app {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header — centered stack, compact but not squeezed */
+.app__header {
+  text-align: center;
+  padding: var(--space-6) var(--space-4) 0;
+}
+
+/* Brand unit — logo + title (clickable) + tagline (not clickable) */
+.brand-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.brand-unit__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: opacity var(--duration-fast) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.brand-unit__link:hover {
+  opacity: 0.7;
+}
+
+.brand-unit__link:focus-visible {
+  opacity: 0.7;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-md);
+}
+
+.brand-unit__logo {
+  display: block;
+  width: 72px;
+  height: auto;
+  margin-bottom: var(--space-1);
+}
+
+.brand-unit__title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.brand-unit__tagline {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* State: playing - hide header */
+body[data-state="playing"] .app__header {
+  display: none;
+}
+
+/* ==========================================================================
+   Brand Mark (Playing State)
+   Subtle logo in top-left corner during playback
+   ========================================================================== */
+
+.brand-mark {
+  position: fixed;
+  top: var(--space-4);
+  left: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-normal) var(--ease-out);
+  z-index: var(--z-header);
+  cursor: pointer;
+}
+
+.brand-mark__logo {
+  width: 24px;
+  height: auto;
+}
+
+body[data-state="playing"] .brand-mark {
+  opacity: 0.5;
+  pointer-events: auto;
+}
+
+body[data-state="playing"] .brand-mark:hover {
+  opacity: 0.8;
+}
+
+body[data-state="playing"] .brand-mark:focus-visible {
+  opacity: 0.8;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-md);
+}
+
+/* ==========================================================================
+   Galaxy Anchor — subtle centered watermark logo
+   ========================================================================== */
+
+.galaxy-anchor {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0.07;
+  z-index: 0;
+}
+
+.galaxy-anchor__logo {
+  display: block;
+  width: 64px;
+  height: auto;
+}
+
+@media (min-width: 768px) {
+  .galaxy-anchor__logo {
+    width: 80px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .galaxy-anchor__logo {
+    width: 96px;
+  }
+}
+
+/* ==========================================================================
+   Mood Galaxy (Selector)
+   ========================================================================== */
+
+.mood-galaxy {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  padding: var(--space-4);
+  overflow: hidden;
+}
+
+/* Fallback: grid layout when galaxy layout not active (loading, reduced-motion, no JS) */
+.mood-galaxy:not(.mood-galaxy--positioned) {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  align-content: center;
+  justify-items: center;
+}
+
+/* Galaxy layout active: children are absolutely positioned by JS */
+.mood-galaxy--positioned {
+  display: block;
+}
+
+/* State: playing - hide mood galaxy */
+body[data-state="playing"] .mood-galaxy {
+  display: none;
+}
+
+/* ==========================================================================
+   Resume Pill
+   Subtle button to resume last session, positioned in mood area
+   ========================================================================== */
+
+.resume-pill {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%); /* NB: any state overriding transform must preserve this */
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--touch-target);
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              background var(--duration-fast) var(--ease-out);
+}
+
+.resume-pill:hover,
+.resume-pill:focus-visible {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+  background: var(--color-surface-elevated);
+}
+
+.resume-pill:active {
+  transform: translateX(-50%) scale(0.98);
+}
+
+.resume-pill[hidden] {
+  display: none;
+}
+
+.resume-pill__icon {
+  font-size: var(--text-sm);
+  opacity: 0.7;
+}
+
+.resume-pill__label {
+  /* Hidden on mobile, shown on larger screens */
+  display: none;
+}
+
+.resume-pill__mood {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+/* State: loading - show loading indicator */
+.mood-galaxy--loading::before {
+  content: 'Loading moods...';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+/* State: error - show error message */
+.mood-galaxy--error::before {
+  content: attr(data-error);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+  padding: var(--space-4);
+}
+
+/* ==========================================================================
+   Mood Visual (Playing Background)
+   ========================================================================== */
+
+.mood-visual {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out);
+  background: var(--color-bg);
+}
+
+body[data-state="playing"] .mood-visual {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   Mood-Specific Ambient Animations
+   Living visuals that breathe — organic, non-repeating patterns
+   Uses co-prime durations (7s, 11s, 13s) for 17+ minute variation cycle
+   GPU-friendly: transform + opacity only (no filters)
+   ========================================================================== */
+
+/* Pseudo-element layers for organic animation */
+.mood-visual::before,
+.mood-visual::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Layer animations - different patterns, co-prime durations */
+@keyframes drift-slow {
+  0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.8; }
+  25% { transform: translate(5%, -8%) scale(1.05); opacity: 1; }
+  50% { transform: translate(-3%, 5%) scale(0.98); opacity: 0.9; }
+  75% { transform: translate(-7%, -3%) scale(1.02); opacity: 0.85; }
+}
+
+@keyframes drift-medium {
+  0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.9; }
+  33% { transform: translate(-6%, 4%) scale(1.03); opacity: 0.75; }
+  66% { transform: translate(4%, -6%) scale(0.97); opacity: 1; }
+}
+
+@keyframes drift-fast {
+  0%, 100% { transform: translate(0%, 0%); opacity: 0.7; }
+  20% { transform: translate(3%, 5%); opacity: 0.9; }
+  40% { transform: translate(-4%, 2%); opacity: 0.8; }
+  60% { transform: translate(2%, -4%); opacity: 1; }
+  80% { transform: translate(-3%, -2%); opacity: 0.85; }
+}
+
+/* ==========================================================================
+   Focus Mood - Cool blue, calm drifting
+   ========================================================================== */
+body[data-mood="focus"] .mood-visual::before {
+  background:
+    radial-gradient(ellipse 90% 70% at 25% 35%, rgba(59, 130, 246, 0.3) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 90% at 75% 65%, rgba(96, 165, 250, 0.25) 0%, transparent 55%);
+  animation: drift-slow 13s ease-in-out infinite;
+}
+
+body[data-mood="focus"] .mood-visual::after {
+  background:
+    radial-gradient(ellipse 60% 60% at 50% 50%, rgba(37, 99, 235, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 50% at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 60%);
+  animation: drift-medium 7s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   Calm Mood - Soft purple, gentle floating
+   ========================================================================== */
+body[data-mood="calm"] .mood-visual::before {
+  background:
+    radial-gradient(ellipse 85% 75% at 35% 25%, rgba(139, 92, 246, 0.32) 0%, transparent 55%),
+    radial-gradient(ellipse 75% 85% at 65% 75%, rgba(167, 139, 250, 0.26) 0%, transparent 50%);
+  animation: drift-slow 11s ease-in-out infinite;
+}
+
+body[data-mood="calm"] .mood-visual::after {
+  background:
+    radial-gradient(ellipse 65% 65% at 50% 50%, rgba(124, 58, 237, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 55% at 80% 30%, rgba(139, 92, 246, 0.14) 0%, transparent 60%);
+  animation: drift-medium 17s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   Late Night Mood - Warm amber, slow glow
+   ========================================================================== */
+body[data-mood="late_night"] .mood-visual::before {
+  background:
+    radial-gradient(ellipse 80% 65% at 45% 35%, rgba(245, 158, 11, 0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 80% at 25% 70%, rgba(251, 191, 36, 0.22) 0%, transparent 50%);
+  animation: drift-slow 13s ease-in-out infinite;
+}
+
+body[data-mood="late_night"] .mood-visual::after {
+  background:
+    radial-gradient(ellipse 70% 55% at 70% 50%, rgba(217, 119, 6, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 70% at 50% 80%, rgba(245, 158, 11, 0.12) 0%, transparent 60%);
+  animation: drift-medium 19s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   Energize Mood - Vibrant red, active pulse
+   ========================================================================== */
+body[data-mood="energize"] .mood-visual::before {
+  background:
+    radial-gradient(ellipse 75% 65% at 35% 30%, rgba(239, 68, 68, 0.32) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 75% at 65% 70%, rgba(248, 113, 113, 0.26) 0%, transparent 50%);
+  animation: drift-fast 7s ease-in-out infinite;
+}
+
+body[data-mood="energize"] .mood-visual::after {
+  background:
+    radial-gradient(ellipse 55% 55% at 50% 50%, rgba(220, 38, 38, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 50% at 75% 25%, rgba(239, 68, 68, 0.16) 0%, transparent 55%);
+  animation: drift-medium 11s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   Reduced Motion: Static gradients only
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .mood-visual::before,
+  .mood-visual::after {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  .resume-pill,
+  .brand-mark {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+   Components (loaded from components/*.css)
+   ========================================================================== */
+
+/* Mood Space - See components/mood-space.css */
+/* Player Bar - See components/player-bar.css */
+/* Settings - See components/settings.css */
+
+/* ==========================================================================
+   Responsive (Mobile-first base, tablet and desktop overrides)
+   ========================================================================== */
+
+/* Tablet */
+@media (min-width: 768px) {
+  .app__header {
+    padding: var(--space-4) var(--space-4) var(--space-1);
+  }
+
+  .brand-unit__logo {
+    width: 88px;
+  }
+
+  .brand-unit__title {
+    font-size: var(--text-xl);
+  }
+
+  .brand-mark {
+    top: var(--space-6);
+    left: var(--space-6);
+  }
+
+  .brand-mark__logo {
+    width: 28px;
+  }
+
+  .resume-pill {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .resume-pill__label {
+    display: inline; /* Show "Resume" label on tablet+ */
+  }
+
+  .mood-galaxy:not(.mood-galaxy--positioned) {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-8);
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .brand-unit__logo {
+    width: 100px;
+  }
+
+  .brand-mark {
+    top: var(--space-8);
+    left: var(--space-8);
+  }
+
+  .brand-mark__logo {
+    width: 32px;
+  }
+
+  .mood-galaxy:not(.mood-galaxy--positioned) {
+    gap: var(--space-12);
+  }
+}
+
+/* ==========================================================================
+   Skip Philosophy Toast
+   Soft friction reminder for frequent skipping
+   ========================================================================== */
+
+.skip-toast {
+  position: fixed;
+  bottom: calc(var(--player-height) + var(--space-4));
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+  backdrop-filter: blur(var(--blur-subtle));
+  -webkit-backdrop-filter: blur(var(--blur-subtle));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+  color: var(--color-text);
+  text-shadow: var(--text-shadow-soft);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-style: italic;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out),
+              transform var(--duration-normal) var(--ease-out);
+  z-index: var(--z-toast);
+  pointer-events: none;
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not (backdrop-filter: blur(1px)) {
+  .skip-toast {
+    background: var(--color-surface-elevated);
+  }
+}
+
+[data-theme="light"] .skip-toast {
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
+}
+
+.skip-toast[data-visible="true"] {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.skip-toast[hidden] {
+  display: block !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-toast {
+    transition: opacity var(--duration-fast);
+    transform: translateX(-50%) translateY(0);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--color-surface-elevated);
+  }
+}

@@ -1,0 +1,234 @@
+/* ==========================================================================
+   Lyrics Panel Component
+   Expandable panel showing track lyrics
+   ========================================================================== */
+
+.lyrics-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 50vh;
+  background: var(--surface-glass);
+  backdrop-filter: blur(var(--blur-heavy));
+  -webkit-backdrop-filter: blur(var(--blur-heavy));
+  border-top: 1px solid var(--color-border);
+  z-index: var(--z-panel);
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform var(--duration-slow) var(--ease-in-out),
+              max-height var(--duration-normal) var(--ease-out),
+              visibility 0s var(--duration-slow);
+  visibility: hidden;
+}
+
+/* Expanded state - double-tap header to toggle */
+.lyrics-panel[data-expanded="true"] {
+  max-height: 75vh;
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not (backdrop-filter: blur(1px)) {
+  .lyrics-panel {
+    background: var(--color-surface);
+  }
+}
+
+/* Override hidden attribute to allow animation */
+.lyrics-panel[hidden] {
+  display: flex !important;
+}
+
+.lyrics-panel:not([hidden]) {
+  transform: translateY(0);
+  visibility: visible;
+  transition: transform var(--duration-slow) var(--ease-in-out),
+              visibility 0s 0s;
+}
+
+.lyrics-panel__header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Drag handle indicator — matches settings-drawer__handle */
+.lyrics-panel__header::before {
+  content: '';
+  position: absolute;
+  top: var(--space-2);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  background: var(--color-text-muted);
+  border-radius: 2px;
+  opacity: 0.4;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.lyrics-panel__header:hover::before {
+  opacity: 0.7;
+}
+
+.lyrics-panel__title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  text-shadow: var(--text-shadow-soft);
+}
+
+.lyrics-panel__close {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  margin-right: calc(-1 * var(--space-2));
+  transition: color var(--duration-fast) var(--ease-out),
+              background var(--duration-fast) var(--ease-out);
+}
+
+.lyrics-panel__close:hover,
+.lyrics-panel__close:focus-visible {
+  color: var(--color-text);
+  background: var(--color-surface-elevated);
+}
+
+.lyrics-panel__close .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.lyrics-panel__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  padding-bottom: calc(var(--player-height) + var(--space-4) + env(safe-area-inset-bottom, 0));
+  font-size: var(--text-sm);
+  line-height: 1.8;
+  color: var(--color-text);
+  text-shadow: var(--text-shadow-soft);
+  white-space: pre-wrap;
+  text-align: center;
+  -webkit-overflow-scrolling: touch;
+  /* Smooth fade transition when lyrics change */
+  opacity: 1;
+  transition: opacity var(--duration-normal) var(--ease-out);
+}
+
+/* Loading state: fade out while changing lyrics */
+.lyrics-panel__content--loading {
+  opacity: 0;
+}
+
+/* Empty state styling for surrender-philosophy messages */
+.lyrics-panel__content--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ==========================================================================
+   Lyrics Button (in player bar)
+   ========================================================================== */
+
+.player-bar__lyrics {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  transition: color var(--duration-fast) var(--ease-out),
+              background var(--duration-fast) var(--ease-out);
+  flex-shrink: 0;
+}
+
+.player-bar__lyrics .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.player-bar__lyrics:hover,
+.player-bar__lyrics:focus-visible {
+  color: var(--color-text);
+  background: var(--color-surface-elevated);
+}
+
+.player-bar__lyrics[data-active="true"] {
+  color: var(--color-accent);
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (min-width: 768px) {
+  .lyrics-panel {
+    max-height: 40vh;
+  }
+
+  .lyrics-panel[data-expanded="true"] {
+    max-height: 70vh;
+  }
+
+  .lyrics-panel__header {
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+  }
+
+  .lyrics-panel__content {
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+  }
+}
+
+/* ==========================================================================
+   Mood-Influenced Border
+   Single rule using accent token instead of per-mood hardcoded rgba
+   ========================================================================== */
+
+body[data-mood] .lyrics-panel {
+  border-top-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+
+/* ==========================================================================
+   Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .lyrics-panel {
+    transition: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--color-surface);
+  }
+
+  .lyrics-panel__header::before {
+    transition: none;
+  }
+
+  .player-bar__lyrics {
+    transition: none;
+  }
+}

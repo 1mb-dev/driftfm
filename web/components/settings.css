@@ -1,0 +1,339 @@
+/* ==========================================================================
+   Settings Component
+   Settings drawer and controls
+   ========================================================================== */
+
+.settings-drawer {
+  position: fixed;
+  bottom: var(--player-height);
+  left: 0;
+  right: 0;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-glass);
+  backdrop-filter: blur(var(--blur-medium));
+  -webkit-backdrop-filter: blur(var(--blur-medium));
+  border-top: 1px solid var(--color-border);
+  z-index: var(--z-drawer);
+  padding: var(--space-4);
+  transform: translateY(100%);
+  transition: transform var(--duration-slow) var(--ease-in-out),
+              visibility 0s var(--duration-slow);
+  visibility: hidden;
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not (backdrop-filter: blur(1px)) {
+  .settings-drawer {
+    background: var(--color-surface);
+  }
+}
+
+/* Override hidden attribute to allow animation */
+.settings-drawer[hidden] {
+  display: block !important;
+}
+
+.settings-drawer:not([hidden]) {
+  transform: translateY(0);
+  visibility: visible;
+  transition: transform var(--duration-slow) var(--ease-in-out),
+              visibility 0s 0s;
+}
+
+/* Drag handle indicator (mobile app pattern) */
+.settings-drawer__handle {
+  width: 36px;
+  height: 4px;
+  background: var(--color-text-muted);
+  border-radius: 2px;
+  margin: 0 auto var(--space-3);
+  opacity: 0.4;
+}
+
+.settings-drawer__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+  width: 100%;
+}
+
+.settings-drawer__title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.settings-drawer__close {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  margin-right: calc(-1 * var(--space-2)); /* Align with edge */
+  transition: color var(--duration-fast) var(--ease-out),
+              background var(--duration-fast) var(--ease-out);
+}
+
+.settings-drawer__close:hover,
+.settings-drawer__close:focus-visible {
+  color: var(--color-text);
+  background: var(--color-surface-elevated);
+}
+
+.settings-drawer__close .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.settings-drawer__content {
+  flex: 1;
+  min-height: 0; /* Allow flex child to shrink below content size for scrolling */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  padding-bottom: var(--space-4);
+}
+
+/* ==========================================================================
+   Setting Row
+   ========================================================================== */
+
+.setting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.setting__label {
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+/* ==========================================================================
+   Toggle Switch
+   ========================================================================== */
+
+.setting__toggle {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  appearance: none;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.setting__toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background: var(--color-text);
+  border-radius: 50%;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.setting__toggle:checked {
+  background: var(--color-accent);
+}
+
+.setting__toggle:checked::after {
+  transform: translateX(20px);
+}
+
+.setting__toggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Theme Toggle
+   ========================================================================== */
+
+.theme-toggle {
+  display: flex;
+  gap: var(--space-1);
+  background: var(--color-surface-elevated);
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+}
+
+.theme-toggle__option {
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+
+.theme-toggle__option:hover {
+  color: var(--color-text);
+}
+
+.theme-toggle__option:has(input:checked) {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.theme-toggle__option:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.setting--fieldset {
+  border: none;
+  padding: 0;
+  padding-top: var(--space-3);
+  margin: 0;
+  margin-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.setting + .setting--fieldset {
+  margin-top: var(--space-4);
+}
+
+/* ==========================================================================
+   Volume Slider
+   ========================================================================== */
+
+.setting__slider {
+  flex: 1;
+  min-width: 80px;
+  height: 4px;
+  appearance: none;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.setting__slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.setting__slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--color-accent);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.setting__slider:hover::-webkit-slider-thumb,
+.setting__slider:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+
+.setting__slider:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+/* ==========================================================================
+   Keyboard Shortcuts List
+   ========================================================================== */
+
+.shortcuts-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: center;
+}
+
+.shortcut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  min-width: 56px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.shortcut kbd {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.shortcut span {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+/* Hide keyboard shortcuts on touch devices (no physical keyboard) */
+@media (max-width: 767px) {
+  .setting--fieldset:has(.shortcuts-list) {
+    display: none;
+  }
+}
+
+/* Tablet+: constrain content width, more padding */
+@media (min-width: 768px) {
+  .settings-drawer {
+    padding: var(--space-6);
+  }
+
+  .settings-drawer__header,
+  .settings-drawer__content {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ==========================================================================
+   Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-drawer {
+    transition: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--color-surface);
+  }
+
+  .setting__toggle,
+  .setting__toggle::after,
+  .theme-toggle__option {
+    transition: none;
+  }
+}

@@ -1,0 +1,189 @@
+/**
+ * Moodlet Discovery Toast
+ *
+ * Subtle UI that appears after 3 tracks, offering mood refinement.
+ * Non-blocking, dismissable, appears once per mood per session.
+ *
+ * Mobile-first: stacked layout base, horizontal at 481px+.
+ */
+
+.moodlet-toast {
+  position: fixed;
+  bottom: calc(var(--player-height) + var(--space-4));
+  left: var(--space-4);
+  right: var(--space-4);
+  transform: translateY(20px);
+  opacity: 0;
+  visibility: hidden;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+
+  background: var(--surface-glass-elevated);
+  backdrop-filter: blur(var(--blur-subtle));
+  -webkit-backdrop-filter: blur(var(--blur-subtle));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+
+  transition:
+    opacity var(--duration-normal) var(--ease-out),
+    transform var(--duration-normal) var(--ease-out),
+    visibility var(--duration-normal);
+
+  z-index: var(--z-toast);
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not (backdrop-filter: blur(1px)) {
+  .moodlet-toast {
+    background: var(--color-surface-elevated);
+  }
+}
+
+.moodlet-toast[data-visible="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.moodlet-toast__message {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-shadow: var(--text-shadow-soft);
+  text-align: center;
+}
+
+.moodlet-toast__options {
+  display: flex;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.moodlet-toast__option {
+  flex: 1;
+  text-align: center;
+  min-height: var(--touch-target);
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.moodlet-toast__option:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+.moodlet-toast__option:active {
+  transform: scale(0.98);
+}
+
+.moodlet-toast__option--secondary {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.moodlet-toast__option--secondary:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+  filter: none;
+}
+
+.moodlet-toast__dismiss {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.moodlet-toast__dismiss:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.moodlet-toast__dismiss .icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Wider screens: horizontal layout */
+@media (min-width: 481px) {
+  .moodlet-toast {
+    flex-direction: row;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(20px);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .moodlet-toast[data-visible="true"] {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .moodlet-toast__message {
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .moodlet-toast__options {
+    width: auto;
+  }
+
+  .moodlet-toast__option {
+    flex: none;
+  }
+
+  .moodlet-toast__dismiss {
+    position: static;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .moodlet-toast {
+    transition: opacity var(--duration-fast);
+    transform: translateY(0);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--color-surface-elevated);
+  }
+
+  .moodlet-toast[data-visible="true"] {
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 481px) and (prefers-reduced-motion: reduce) {
+  .moodlet-toast {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .moodlet-toast[data-visible="true"] {
+    transform: translateX(-50%) translateY(0);
+  }
+}

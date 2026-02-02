@@ -1,0 +1,191 @@
+/* ==========================================================================
+   About Panel Component
+   Slide-up panel with project information
+   ========================================================================== */
+
+.about-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-glass);
+  backdrop-filter: blur(var(--blur-medium));
+  -webkit-backdrop-filter: blur(var(--blur-medium));
+  border-top: 1px solid var(--color-border);
+  z-index: var(--z-drawer);
+  padding: var(--space-4);
+  transform: translateY(100%);
+  transition: transform var(--duration-slow) var(--ease-in-out),
+              visibility 0s var(--duration-slow);
+  visibility: hidden;
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not (backdrop-filter: blur(1px)) {
+  .about-panel {
+    background: var(--color-surface);
+  }
+}
+
+/* Override hidden attribute to allow animation */
+.about-panel[hidden] {
+  display: block !important;
+}
+
+.about-panel:not([hidden]) {
+  transform: translateY(0);
+  visibility: visible;
+  transition: transform var(--duration-slow) var(--ease-in-out),
+              visibility 0s 0s;
+}
+
+/* Drag handle indicator */
+.about-panel__handle {
+  width: 36px;
+  height: 4px;
+  background: var(--color-text-muted);
+  border-radius: 2px;
+  margin: 0 auto var(--space-3);
+  opacity: 0.4;
+}
+
+.about-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+  width: 100%;
+}
+
+.about-panel__title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.about-panel__theme-btn,
+.about-panel__close {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  transition: color var(--duration-fast) var(--ease-out),
+              background var(--duration-fast) var(--ease-out);
+}
+
+.about-panel__theme-btn {
+  margin-left: calc(-1 * var(--space-2));
+}
+
+.about-panel__close {
+  margin-right: calc(-1 * var(--space-2));
+}
+
+.about-panel__theme-btn:hover,
+.about-panel__theme-btn:focus-visible,
+.about-panel__close:hover,
+.about-panel__close:focus-visible {
+  color: var(--color-text);
+  background: var(--color-surface-elevated);
+}
+
+.about-panel__theme-btn .icon,
+.about-panel__close .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.about-panel__content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0));
+}
+
+/* Lift above player bar when playing */
+body[data-state="playing"] .about-panel {
+  bottom: var(--player-height);
+}
+
+.about-panel__text {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.about-panel__philosophy {
+  font-style: italic;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+
+.about-panel__tech {
+  font-size: var(--text-xs);
+  color: var(--color-text-subtle);
+  line-height: 1.6;
+}
+
+.about-panel__link {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-border);
+  transition: color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.about-panel__link:hover,
+.about-panel__link:focus-visible {
+  color: var(--color-text);
+  border-color: var(--color-accent);
+}
+
+/* About trigger is the brand unit (.brand-unit) in idle, brand-mark in playing — styles in style.css */
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (min-width: 768px) {
+  .about-panel {
+    padding: var(--space-6);
+  }
+
+  .about-panel__header,
+  .about-panel__content {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ==========================================================================
+   Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .about-panel {
+    transition: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--color-surface);
+  }
+
+  .about-panel__theme-btn,
+  .about-panel__close,
+  .about-panel__link {
+    transition: none;
+  }
+}

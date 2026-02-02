@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<!--
+
+        ~  ~  ~  ~  ~  ~  ~  ~  ~  ~
+      ~    ░░░░░░░░░░░░░░░░░░░░░░    ~
+    ~    ░░  D R I F T    F M  ░░      ~
+      ~    ░░░░░░░░░░░░░░░░░░░░░░    ~
+        ~  ~  ~  ~  ~  ~  ~  ~  ~  ~
+
+        Stop choosing. Start drifting.
+
+        Songs for every mood.
+        No queues. No algorithms. Just drift.
+
+        ♪ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ♪
+
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a" id="theme-color">
+  <meta name="description" content="Ambient mood radio. Pick a mood. Let it drift.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Drift FM">
+  <title>Drift FM</title>
+  <!-- PWA manifest and icons -->
+  <link rel="manifest" href="/manifest.json" crossorigin="anonymous">
+  <!-- Favicons -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <!-- Drift FM -->
+  <meta name="drift:philosophy" content="Stop choosing. Start drifting.">
+  <meta name="drift:principle" content="Subtract until it breaks, then add one thing back.">
+  <!-- Theme initialization (blocking — before CSS to prevent flash) -->
+  <script src="/init-theme.js"></script>
+  <link rel="stylesheet" href="/tokens.css">
+  <link rel="stylesheet" href="/base.css">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/components/mood-space.css">
+  <link rel="stylesheet" href="/components/player-bar.css">
+  <link rel="stylesheet" href="/components/settings.css">
+  <link rel="stylesheet" href="/components/moodlet.css">
+  <link rel="stylesheet" href="/components/lyrics.css">
+  <link rel="stylesheet" href="/components/about.css">
+</head>
+<body data-state="idle" data-mood="">
+  <script src="/init-body.js"></script>
+  <noscript>
+    <div style="background:#0a0a0a;text-align:center;padding:4rem 1rem;color:#888;font-family:system-ui;min-height:100vh">
+      <h1 style="color:#fafafa">Drift FM</h1>
+      <p>Ambient mood radio requires JavaScript to play.</p>
+      <p style="font-style:italic;color:#555">Stop choosing. Start drifting.</p>
+    </div>
+  </noscript>
+
+  <!-- Splash: branded loading screen, dissolved by JS when app is ready -->
+  <div class="splash" id="splash" aria-hidden="true">
+    <div class="splash__brand">
+      <svg class="splash__logo" viewBox="90 170 332 200" aria-hidden="true">
+        <defs><linearGradient id="drift-grad-splash" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3b82f6"/><stop offset="45%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient></defs>
+        <path d="M108 310 C156 310, 180 186, 256 186 C332 186, 356 310, 404 310" fill="none" stroke="url(#drift-grad-splash)" stroke-width="38" stroke-linecap="round"/>
+        <path d="M132 348 C170 348, 196 296, 256 296 C316 296, 342 348, 380 348" fill="none" stroke="url(#drift-grad-splash)" stroke-width="12" stroke-linecap="round" opacity="0.25"/>
+      </svg>
+      <span class="splash__title">Drift FM</span>
+    </div>
+  </div>
+
+  <main class="app">
+    <!-- Header: visible in idle state -->
+    <header class="app__header" id="header">
+      <div class="brand-unit">
+        <a class="brand-unit__link" id="about-btn" href="#about" role="button" aria-label="About Drift FM">
+          <svg class="brand-unit__logo" viewBox="90 160 332 200" aria-hidden="true">
+            <defs><linearGradient id="drift-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3b82f6"/><stop offset="45%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient></defs>
+            <path d="M108 310 C156 310, 180 186, 256 186 C332 186, 356 310, 404 310" fill="none" stroke="url(#drift-grad)" stroke-width="38" stroke-linecap="round"/>
+            <path d="M132 348 C170 348, 196 296, 256 296 C316 296, 342 348, 380 348" fill="none" stroke="url(#drift-grad)" stroke-width="12" stroke-linecap="round" opacity="0.25"/>
+          </svg>
+          <span class="brand-unit__title">Drift FM</span>
+        </a>
+        <span class="brand-unit__tagline">Pick a mood. Let it drift.</span>
+      </div>
+    </header>
+
+    <!-- Mood selector: visible in idle state -->
+    <section class="mood-galaxy mood-galaxy--loading" id="mood-galaxy" aria-label="Choose a mood">
+      <!-- Resume pill: positioned top-right of mood area -->
+      <button class="resume-pill" id="resume-btn" hidden aria-label="Resume last session">
+        <span class="resume-pill__icon" aria-hidden="true">↻</span>
+        <span class="resume-pill__label">Resume</span>
+        <span class="resume-pill__mood" id="resume-mood"></span>
+      </button>
+      <!-- JS inserts mood-space buttons here (before galaxy-anchor) -->
+      <!-- Center watermark — last child to avoid nth-child interference with orb drift -->
+      <div class="galaxy-anchor" aria-hidden="true">
+        <svg class="galaxy-anchor__logo" viewBox="90 160 332 200" aria-hidden="true">
+          <defs><linearGradient id="drift-grad-anchor" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3b82f6"/><stop offset="45%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient></defs>
+          <path d="M108 310 C156 310, 180 186, 256 186 C332 186, 356 310, 404 310" fill="none" stroke="url(#drift-grad-anchor)" stroke-width="38" stroke-linecap="round"/>
+          <path d="M132 348 C170 348, 196 296, 256 296 C316 296, 342 348, 380 348" fill="none" stroke="url(#drift-grad-anchor)" stroke-width="12" stroke-linecap="round" opacity="0.25"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- Screen reader live region for track announcements -->
+    <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Playing visual: visible in playing state -->
+    <div class="mood-visual" id="mood-visual" aria-hidden="true"></div>
+
+    <!-- Brand mark: visible in playing state, opens About -->
+    <a class="brand-mark" id="about-btn-playing" href="#about" role="button" aria-label="About Drift FM">
+      <svg class="brand-mark__logo" viewBox="90 170 332 200" aria-hidden="true">
+        <defs><linearGradient id="drift-grad-wm" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3b82f6"/><stop offset="45%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient></defs>
+        <path d="M108 310 C156 310, 180 186, 256 186 C332 186, 356 310, 404 310" fill="none" stroke="url(#drift-grad-wm)" stroke-width="38" stroke-linecap="round"/>
+      </svg>
+      Drift FM
+    </a>
+
+    <!-- Player bar: visible in playing state -->
+    <footer class="player-bar" id="player-bar" hidden>
+      <div class="player-bar__now-playing">
+        <span class="player-bar__track" id="track-name">Ready</span>
+      </div>
+      <div class="player-bar__mood" id="mood-indicator" role="button" tabindex="0" aria-label="Return to mood selector">
+        <!-- Tap to return to mood selector -->
+      </div>
+      <button class="player-bar__play" id="play-btn" aria-label="Play">
+        <svg class="icon" viewBox="0 0 24 24" id="play-icon" aria-hidden="true">
+          <polygon points="5,3 19,12 5,21"></polygon>
+        </svg>
+        <svg class="icon hidden" viewBox="0 0 24 24" id="pause-icon" aria-hidden="true">
+          <rect x="6" y="4" width="4" height="16"></rect>
+          <rect x="14" y="4" width="4" height="16"></rect>
+        </svg>
+      </button>
+      <button class="player-bar__skip" id="skip-btn" aria-label="Skip to next track">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <polygon points="5,4 15,12 5,20"></polygon>
+          <rect x="15" y="4" width="4" height="16"></rect>
+        </svg>
+      </button>
+      <div class="player-bar__progress">
+        <div class="progress-rail" id="progress-rail" role="slider" aria-label="Track progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+          <div class="progress-rail__fill" id="progress-fill"></div>
+        </div>
+        <span class="player-bar__time" id="current-time">0:00</span>
+      </div>
+      <button class="player-bar__lyrics" id="lyrics-btn" hidden aria-label="Show lyrics">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 17H7v-7h2m8 7h-2v-7h2M12 17h-2V7h2" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+        </svg>
+      </button>
+      <button class="player-bar__settings" id="settings-btn" aria-label="Settings">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="2"></path>
+        </svg>
+      </button>
+    </footer>
+
+    <!-- Settings drawer: hidden by default -->
+    <aside class="settings-drawer" id="settings-drawer" hidden aria-label="Settings">
+      <div class="settings-drawer__handle" aria-hidden="true"></div>
+      <div class="settings-drawer__header">
+        <span class="settings-drawer__title">Settings</span>
+        <button type="button" class="settings-drawer__close" id="settings-close" aria-label="Close settings">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="settings-drawer__content">
+        <label class="setting">
+          <span class="setting__label">Instrumental Only</span>
+          <input type="checkbox" id="instrumental-toggle" class="setting__toggle">
+        </label>
+        <label class="setting">
+          <span class="setting__label">Show Lyrics Button</span>
+          <input type="checkbox" id="show-lyrics-toggle" class="setting__toggle" checked>
+        </label>
+        <fieldset class="setting setting--fieldset">
+          <legend class="setting__label">Theme</legend>
+          <div class="theme-toggle" id="theme-toggle" role="radiogroup" aria-label="Theme selection">
+            <label class="theme-toggle__option">
+              <input type="radio" name="theme" value="dark" class="sr-only">
+              <span>Dark</span>
+            </label>
+            <label class="theme-toggle__option">
+              <input type="radio" name="theme" value="light" class="sr-only">
+              <span>Light</span>
+            </label>
+            <label class="theme-toggle__option">
+              <input type="radio" name="theme" value="auto" class="sr-only" checked>
+              <span>Auto</span>
+            </label>
+          </div>
+        </fieldset>
+        <label class="setting">
+          <span class="setting__label">Volume</span>
+          <input type="range" id="volume-slider" class="setting__slider" min="0" max="100" value="100" aria-label="Volume">
+        </label>
+        <fieldset class="setting setting--fieldset">
+          <legend class="setting__label">Keyboard Shortcuts</legend>
+          <div class="shortcuts-list">
+            <div class="shortcut"><kbd>Space</kbd><span>Play</span></div>
+            <div class="shortcut"><kbd>N</kbd><span>Skip</span></div>
+            <div class="shortcut"><kbd>M</kbd><span>Mute</span></div>
+            <div class="shortcut"><kbd>L</kbd><span>Lyrics</span></div>
+            <div class="shortcut"><kbd>I</kbd><span>About</span></div>
+            <div class="shortcut"><kbd>Esc</kbd><span>Exit</span></div>
+          </div>
+        </fieldset>
+      </div>
+    </aside>
+
+    <!-- Lyrics panel: expandable, shows lyrics for current track -->
+    <aside class="lyrics-panel" id="lyrics-panel" hidden aria-label="Track lyrics">
+      <div class="lyrics-panel__header">
+        <span class="lyrics-panel__title">Lyrics</span>
+        <button type="button" class="lyrics-panel__close" id="lyrics-close" aria-label="Close lyrics">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="lyrics-panel__content" id="lyrics-content">
+        <!-- Lyrics text rendered here -->
+      </div>
+    </aside>
+
+    <!-- About panel: project information -->
+    <aside class="about-panel" id="about-panel" hidden aria-label="About Drift FM">
+      <div class="about-panel__handle" aria-hidden="true"></div>
+      <div class="about-panel__header">
+        <button type="button" class="about-panel__theme-btn" id="about-theme-btn" aria-label="Toggle theme">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" id="about-theme-icon">
+            <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <span class="about-panel__title">About</span>
+        <button type="button" class="about-panel__close" id="about-close" aria-label="Close about">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="about-panel__content">
+        <p class="about-panel__text">Drift FM is an always-on radio for different moods.</p>
+        <p class="about-panel__text">Songs with real structure and soul. No queues. No algorithms. Just drift.</p>
+        <p class="about-panel__philosophy">Stop choosing. Start drifting.</p>
+        <p class="about-panel__tech">Built with Go, SQLite, and vanilla JS. No frameworks. No build step.</p>
+      </div>
+    </aside>
+
+    <!-- Moodlet discovery toast: appears after 3 tracks -->
+    <div class="moodlet-toast" id="moodlet-toast" hidden aria-live="polite">
+      <span class="moodlet-toast__message">Want to go deeper?</span>
+      <div class="moodlet-toast__options">
+        <button class="moodlet-toast__option" data-direction="deeper">
+          <span class="moodlet-toast__label" id="moodlet-deeper">Deeper Focus</span>
+        </button>
+        <button class="moodlet-toast__option moodlet-toast__option--secondary" data-direction="lighter">
+          <span class="moodlet-toast__label">Lighter flow</span>
+        </button>
+      </div>
+      <button class="moodlet-toast__dismiss" aria-label="Dismiss">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </main>
+
+  <!-- Audio elements for gapless playback -->
+  <audio id="audio-current" preload="auto"></audio>
+  <audio id="audio-next" preload="auto"></audio>
+
+  <script type="module" src="/app.js"></script>
+</body>
+<!--
+  ≈ Drift FM ≈
+  Built with Go, vanilla JS, and a belief
+  that the best interface is the one that disappears.
+
+  "A quiet room with soft lighting where music just... happens."
+
+  No frameworks were mass-produced in the making of this radio.
+  View source is the original open door. Thanks for looking.
+-->
+</html>
