@@ -32,3 +32,6 @@ coverage.html
 # Build
 *.test
 .claude/
+
+# Planning
+todos/
