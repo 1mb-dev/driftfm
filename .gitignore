@@ -1,0 +1,34 @@
+# Binary
+bin/
+*.exe
+
+# Database
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Audio files (users provide their own)
+audio/tracks/**/*.mp3
+
+# Environment
+.env
+.env.local
+.env.enc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test artifacts
+coverage.out
+coverage.html
+
+# Build
+*.test
+.claude/
