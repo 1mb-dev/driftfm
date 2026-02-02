@@ -1,0 +1,73 @@
+# golangci-lint v2 configuration for Drift FM
+# Philosophy: catch bugs and security issues, skip style enforcement
+version: "2"
+
+run:
+  tests: true
+
+linters:
+  default: none
+  enable:
+    # Correctness
+    - errcheck        # unchecked errors
+    - govet           # go vet passes
+    - staticcheck     # comprehensive static analysis
+    - ineffassign     # dead assignments
+    - unused          # unused code
+    # Security
+    - gosec           # security issues
+    # Bugs
+    - bodyclose       # unclosed HTTP response bodies
+    - durationcheck   # duration multiplication bugs
+    - errorlint       # error wrapping (Go 1.13+)
+    - copyloopvar     # loop variable capture
+    # Code quality (low noise)
+    - misspell        # typos
+    - unconvert       # unnecessary type conversions
+    - unparam         # unused function parameters
+    - gocritic        # useful diagnostics
+
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: false
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - performance
+      disabled-checks:
+        - commentFormatting
+        - hugeParam
+    gosec:
+      excludes:
+        - G104              # covered by errcheck
+        - G201              # SQL formatting -- uses parameterized placeholders
+        - G304              # file path variables -- expected for file serving
+        - G404              # weak RNG -- used for shuffling, not crypto
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment    # struct field ordering is style, not bugs
+        - shadow            # too noisy in idiomatic Go (defer closures)
+    staticcheck:
+      checks:
+        - all
+        - -SA1019           # deprecated usage -- handle manually
+        - -ST1000           # package comments -- style, not bugs
+
+  exclusions:
+    generated: lax
+    rules:
+      - path: _test\.go
+        linters:
+          - errcheck        # test error handling is often intentional
+          - gosec           # test code doesn't need security hardening
+          - unparam         # test helpers often have fixed params
+
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 5
+
+formatters:
+  exclusions:
+    generated: lax
