@@ -28,16 +28,22 @@ import (
 var version = "dev"
 
 func main() {
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func run() error {
 	// Load configuration: defaults → config.yaml → config.local.yaml → env vars
 	cfg, err := config.Load("config.yaml", "config.local.yaml")
 	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+		return fmt.Errorf("failed to load config: %w", err)
 	}
 
 	// Initialize repository
 	repo, err := inventory.NewRepository(cfg.Database.Path)
 	if err != nil {
-		log.Fatalf("Failed to initialize repository: %v", err)
+		return fmt.Errorf("failed to initialize repository: %w", err)
 	}
 	defer func() {
 		if err := repo.Close(); err != nil {
@@ -51,7 +57,7 @@ func main() {
 	// Initialize cache
 	appCache, err := cache.New()
 	if err != nil {
-		log.Fatalf("Failed to initialize cache: %v", err)
+		return fmt.Errorf("failed to initialize cache: %w", err)
 	}
 	defer func() {
 		if err := appCache.Close(); err != nil {
@@ -162,15 +168,15 @@ func main() {
 	// Get parsed timeouts (validated during config.Load, errors should not occur)
 	readTimeout, err := cfg.GetReadTimeout()
 	if err != nil {
-		log.Fatalf("Invalid read timeout: %v", err)
+		return fmt.Errorf("invalid read timeout: %w", err)
 	}
 	writeTimeout, err := cfg.GetWriteTimeout()
 	if err != nil {
-		log.Fatalf("Invalid write timeout: %v", err)
+		return fmt.Errorf("invalid write timeout: %w", err)
 	}
 	shutdownTimeout, err := cfg.GetShutdownTimeout()
 	if err != nil {
-		log.Fatalf("Invalid shutdown timeout: %v", err)
+		return fmt.Errorf("invalid shutdown timeout: %w", err)
 	}
 
 	// Create server with production timeouts
@@ -185,20 +191,29 @@ func main() {
 	}
 
 	// Start server in goroutine
+	serverErr := make(chan error, 1)
 	go func() {
 		log.Printf("Drift FM %s starting on http://localhost:%d", version, cfg.Server.Port)
 		log.Printf("Database: %s", cfg.Database.Path)
 		log.Printf("Audio path: %s", cfg.Audio.LocalPath)
 
 		if err := server.ListenAndServe(); err != http.ErrServerClosed {
-			log.Fatalf("Server error: %v", err)
+			serverErr <- fmt.Errorf("server error: %w", err)
 		}
+		close(serverErr)
 	}()
 
-	// Wait for shutdown signal
+	// Wait for shutdown signal or server error
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-	<-quit
+
+	select {
+	case <-quit:
+	case err := <-serverErr:
+		if err != nil {
+			return err
+		}
+	}
 
 	log.Println("Shutting down server...")
 
@@ -211,6 +226,7 @@ func main() {
 	}
 
 	log.Println("Server stopped")
+	return nil
 }
 
 // securityHeaders adds standard security headers to all responses.
