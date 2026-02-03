@@ -1,5 +1,7 @@
 # Drift FM
 
+[![CI](https://github.com/1mb-dev/driftfm/actions/workflows/ci.yml/badge.svg)](https://github.com/1mb-dev/driftfm/actions/workflows/ci.yml)
+
 Mood radio you host yourself.
 
 Drop in your mp3s, tag them by mood, hit play. Continuous shuffled playback per mood. No accounts, no tracking, no frameworks.
