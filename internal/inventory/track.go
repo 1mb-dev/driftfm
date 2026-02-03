@@ -18,10 +18,10 @@ type Track struct {
 	Artist *string `json:"artist,omitempty"`
 
 	// Classification
-	Mood      string  `json:"mood"`
-	Energy    string  `json:"energy"`
-	TempoBPM  *int    `json:"tempo_bpm,omitempty"`
-	HasVocals bool    `json:"has_vocals"`
+	Mood       string  `json:"mood"`
+	Energy     string  `json:"energy"`
+	TempoBPM   *int    `json:"tempo_bpm,omitempty"`
+	HasVocals  bool    `json:"has_vocals"`
 	MusicalKey *string `json:"musical_key,omitempty"`
 
 	// Moodlet discovery

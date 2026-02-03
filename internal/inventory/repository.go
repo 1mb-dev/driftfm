@@ -247,4 +247,3 @@ func (r *Repository) GetMoodStats() ([]MoodStats, error) {
 
 	return stats, nil
 }
-
