@@ -63,7 +63,7 @@ internal/
 
 **Content-addressed paths:** Audio files live at `audio/tracks/<prefix>/<slug>-<hex-id>.mp3`. The hex prefix distributes files across subdirectories for filesystem performance.
 
-**No SPA framework:** The player is ~500 lines of vanilla JS. CSS variables handle theming. No build step, no node_modules, no bundler.
+**No SPA framework:** The player is vanilla JS (~1000 lines in app.js). CSS variables handle theming. No build step, no node_modules, no bundler.
 
 ---
 
@@ -112,7 +112,7 @@ internal/
 ```
 web/
 ├── index.html           Single page, no routing
-├── app.js               Main application logic (~500 lines)
+├── app.js               Main application logic (~1000 lines)
 ├── galaxy.js            Mood galaxy visualization
 ├── style.css            Layout, responsive styles
 ├── tokens.css           CSS variables for theming
