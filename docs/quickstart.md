@@ -265,17 +265,17 @@ make db-migrate
 
 ## Configuration
 
-The server reads `config.yaml` by default. Override any value with environment variables using the `DRIFT_` prefix:
+The server reads `config.yaml` by default. Override any value with environment variables:
 
 ```bash
 # Change port
-DRIFT_SERVER_PORT=3000 make run
+PORT=3000 make run
 
 # Change database path
-DRIFT_DATABASE_PATH=/var/lib/driftfm/inventory.db make run
+DB_PATH=/var/lib/driftfm/inventory.db make run
 
 # Change audio directory
-DRIFT_AUDIO_LOCAL_PATH=/mnt/music make run
+AUDIO_STORE_LOCAL_PATH=/mnt/music make run
 ```
 
 See `config.yaml` for all available options.
@@ -295,4 +295,4 @@ sqlite3 data/inventory.db "SELECT mood, COUNT(*) FROM tracks WHERE status='appro
 
 **Focus mood shows no tracks** — Focus enforces instrumental-only. If you imported tracks with `--vocals`, they won't appear in focus playlists. Re-import without the `--vocals` flag, or use a different mood.
 
-**Port already in use** — Change the port: `DRIFT_SERVER_PORT=3001 make run`
+**Port already in use** — Change the port: `PORT=3001 make run`

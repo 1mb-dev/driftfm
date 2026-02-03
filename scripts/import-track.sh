@@ -118,6 +118,10 @@ fi
 # File will be named after we know the track ID
 # Format: audio/tracks/<prefix>/<title-slug>-<id-hex>.mp3
 FILE_EXT="${INPUT_FILE##*.}"
+if [[ ! "$FILE_EXT" =~ ^[a-zA-Z0-9]+$ ]]; then
+    echo "Error: Invalid file extension: $FILE_EXT"
+    exit 1
+fi
 TEMP_DIR="audio/tracks/tmp"
 TEMP_FILENAME="importing_$(openssl rand -hex 4).${FILE_EXT}"
 TEMP_PATH="${TEMP_DIR}/${TEMP_FILENAME}"

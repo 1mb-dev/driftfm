@@ -3,6 +3,7 @@ package inventory
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -90,7 +91,7 @@ func (r *Repository) GetByID(id int64) (*Track, error) {
 	query := fmt.Sprintf(`SELECT %s %s WHERE t.id = ?`, trackColumns, trackFrom)
 
 	st, err := scanTrackRow(r.db.QueryRow(query, id))
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
