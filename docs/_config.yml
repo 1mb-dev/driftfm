@@ -1,0 +1,10 @@
+theme: minima
+title: Drift FM
+description: Self-hosted mood radio
+minima:
+  skin: auto
+header_pages:
+  - quickstart.md
+  - architecture.md
+  - building-driftfm.md
+  - design.md
