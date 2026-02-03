@@ -2,8 +2,6 @@
 title: Quickstart
 ---
 
-# Quickstart
-
 Get Drift FM running with your own music in a few minutes.
 
 ---

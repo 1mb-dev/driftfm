@@ -2,8 +2,6 @@
 title: Design Language
 ---
 
-# Design Language
-
 Frontend design system reference for Drift FM contributors. This covers the token system, theming, motion, and component patterns used across the UI.
 
 For the broader architecture (backend, data model, packages), see [Architecture](architecture). For the philosophy behind the tech choices, see [Building Drift FM](building-driftfm).

@@ -2,8 +2,6 @@
 title: Building Drift FM
 ---
 
-# Building Drift FM
-
 The opinions, trade-offs, and philosophy behind how Drift FM is built. For the technical architecture (packages, data model, request flow), see [Architecture](architecture).
 
 ---
