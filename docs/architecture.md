@@ -1,3 +1,7 @@
+---
+title: Architecture
+---
+
 # Architecture
 
 Drift FM is a mood-based internet radio you host yourself. Pick a mood, get continuous music. No algorithms, no accounts, no tracking.
