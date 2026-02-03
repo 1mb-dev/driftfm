@@ -2,78 +2,39 @@
 title: Design Language
 ---
 
-Frontend design system reference for Drift FM contributors. This covers the token system, theming, motion, and component patterns used across the UI.
+Frontend design system reference. Token values live in `web/tokens.css` — this page covers the intent and patterns behind them.
 
-For the broader architecture (backend, data model, packages), see [Architecture](architecture). For the philosophy behind the tech choices, see [Building Drift FM](building-driftfm).
+For backend architecture, see [Architecture](architecture). For the philosophy, see [Building Drift FM](building-driftfm).
 
 ---
 
 ## Philosophy
 
-- **Mood-driven.** The UI adapts to the active mood — accent colors, ambient backgrounds, and breathing rhythms all shift.
-- **Dark-first.** The default theme is dark. Light theme is fully supported. Auto mode follows OS preference.
-- **Accessible.** Focus-visible outlines, 44px touch targets, `prefers-reduced-motion` support, ARIA live regions.
+- **Mood-driven.** UI adapts to the active mood — accent colors, backgrounds, breathing rhythms all shift.
+- **Dark-first.** Dark default, light supported, auto follows OS preference.
+- **Accessible.** Focus-visible, 44px touch targets, `prefers-reduced-motion`, ARIA live regions.
 - **No frameworks.** Vanilla JS, CSS custom properties, ES6 modules. No build step.
 
 ---
 
 ## Color System
 
-Colors are defined as semantic tokens in `web/tokens.css`. Mood-specific accents are remapped dynamically via `body[data-mood]`.
+Semantic tokens in `:root`, mood accents remapped via `body[data-mood]`.
 
-### Semantic Tokens (Dark Default)
+| Mood | Base | Dim |
+|------|------|-----|
+| Focus | `#3b82f6` (blue) | `#1e40af` |
+| Calm | `#8b5cf6` (purple) | `#5b21b6` |
+| Late Night | `#f59e0b` (amber) | `#b45309` |
+| Energize | `#ef4444` (red) | `#b91c1c` |
 
-| Token | Value | Purpose |
-|-------|-------|---------|
-| `--color-bg` | `#0a0a0a` | Page background |
-| `--color-surface` | `#141414` | Card/panel backgrounds |
-| `--color-surface-elevated` | `#1a1a1a` | Elevated surfaces |
-| `--color-text` | `#fafafa` | Primary text |
-| `--color-text-muted` | `#888888` | Secondary text |
-| `--color-text-subtle` | `#838383` | Tertiary text |
-| `--color-border` | `#2a2a2a` | Borders and dividers |
-
-### Mood Colors
-
-| Mood | Base | Dim | Accent Use |
-|------|------|-----|------------|
-| Focus | `#3b82f6` (blue) | `#1e40af` | Default accent |
-| Calm | `#8b5cf6` (purple) | `#5b21b6` | |
-| Late Night | `#f59e0b` (amber) | `#b45309` | |
-| Energize | `#ef4444` (red) | `#b91c1c` | |
-
-### Dynamic Accent
-
-The active mood sets `--color-accent` and `--color-accent-dim` via data attributes:
-
-```css
-body[data-mood="focus"]  { --color-accent: var(--color-focus); }
-body[data-mood="calm"]   { --color-accent: var(--color-calm); }
-```
-
-All accent-aware components reference `--color-accent` — never a specific mood color. This means adding a new mood requires only a new `body[data-mood]` rule.
+Components reference `--color-accent` — never a specific mood color. Adding a mood means one new `body[data-mood]` rule.
 
 ---
 
 ## Typography
 
-System font stack. No web fonts, no loading delay.
-
-```css
---font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-```
-
-### Scale
-
-| Token | Size | Usage |
-|-------|------|-------|
-| `--text-xs` | 0.75rem | Labels, metadata |
-| `--text-sm` | 0.875rem | Secondary text, mood orb labels |
-| `--text-base` | 1rem | Body text |
-| `--text-lg` | 1.25rem | Tablet mood labels |
-| `--text-xl` | 1.5rem | Section headings |
-| `--text-2xl` | 2rem | Page headings |
-| `--text-hero` | 2.5rem | Hero display text |
+System font stack, no web fonts. Rem scale from `--text-xs` (0.75rem) to `--text-hero` (2.5rem). See `tokens.css` for the full scale.
 
 ---
 
@@ -81,108 +42,35 @@ System font stack. No web fonts, no loading delay.
 
 Three modes: `dark`, `light`, `auto`. Stored in localStorage, applied via `[data-theme]` on `<html>`.
 
-### How It Works
+A synchronous script (`init-theme.js`) reads the preference before first paint to prevent flash. If `auto`, resolves via `prefers-color-scheme`. Updates `<meta name="theme-color">` for browser chrome.
 
-1. A synchronous external script (`init-theme.js`) loaded in `index.html` before other scripts reads the stored preference before first paint — prevents flash of wrong theme.
-2. If `auto`, resolves via `window.matchMedia('(prefers-color-scheme: dark)')`.
-3. Sets `document.documentElement.dataset.theme` to `'dark'` or `'light'`.
-4. Updates `<meta name="theme-color">` for browser chrome.
-
-### Light Theme Overrides
-
-The `[data-theme="light"]` selector overrides semantic tokens:
-
-| Token | Dark | Light |
-|-------|------|-------|
-| `--color-bg` | `#0a0a0a` | `#fafafa` |
-| `--color-surface` | `#141414` | `#ffffff` |
-| `--color-text` | `#fafafa` | `#1a1a1a` |
-| `--surface-glass` | `rgba(10,10,10,0.8)` | `rgba(255,255,255,0.75)` |
-
-Shadows and text-shadows also reduce in intensity for light theme.
+`[data-theme="light"]` overrides all semantic tokens — backgrounds, surfaces, glass, shadows.
 
 ---
 
 ## Glass Morphism
 
-Layered translucent surfaces with backdrop blur. Used for the player bar, panels, drawers, and toasts.
+Translucent surfaces with backdrop blur. Three blur levels: subtle (8px), medium (16px), heavy (24px). Glass surfaces, scrims, and text-shadow tokens for legibility are all in `tokens.css`.
 
-### Blur Levels
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--blur-subtle` | 8px | Background hints |
-| `--blur-medium` | 16px | Panels, drawers |
-| `--blur-heavy` | 24px | Modal overlays |
-
-### Glass Surfaces
-
-```css
---surface-glass: rgba(10, 10, 10, 0.8);           /* Dark */
---surface-glass-elevated: rgba(26, 26, 26, 0.85);  /* Dark elevated */
---surface-scrim: rgba(0, 0, 0, 0.4);               /* Overlay dimming */
-```
-
-### Fallbacks
-
-Browsers that don't support `backdrop-filter` get solid `--color-surface` backgrounds. The design is legible either way.
-
-### Text Legibility
-
-Text over glass surfaces uses text-shadow tokens:
-
-```css
---text-shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3);    /* Default */
---text-shadow-strong: 0 2px 4px rgba(0, 0, 0, 0.5);   /* Over busy backgrounds */
-```
+Fallback: browsers without `backdrop-filter` get solid `--color-surface` backgrounds.
 
 ---
 
 ## Motion
 
-### Duration Tokens
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--duration-instant` | 100ms | Immediate feedback |
-| `--duration-fast` | 150ms | Hover, focus transitions |
-| `--duration-normal` | 300ms | Panel open/close |
-| `--duration-slow` | 500ms | Page-level transitions |
-| `--duration-ambient` | 4000ms | Breathing animation base |
-
-### Easing
-
-| Token | Curve | Usage |
-|-------|-------|-------|
-| `--ease-out` | `cubic-bezier(0, 0, 0.2, 1)` | Elements entering |
-| `--ease-in` | `cubic-bezier(0.4, 0, 1, 1)` | Elements exiting |
-| `--ease-in-out` | `cubic-bezier(0.4, 0, 0.2, 1)` | Continuous motion |
+Duration tokens from `--duration-instant` (100ms) to `--duration-ambient` (4s). Three easing curves: `--ease-out`, `--ease-in`, `--ease-in-out`.
 
 ### Co-Prime Drift
 
-Mood orb orbital drift uses co-prime durations so animation cycles never visually repeat:
-
-```
-Orb 1: 23s    Orb 2: 29s    Orb 3: 31s
-Orb 4: 37s    Orb 5: 41s    Orb 6: 43s
-```
-
-Ambient background gradients use a separate co-prime set: 7s, 11s, 13s, 17s, 19s — producing a variation cycle over 17 minutes.
+Orb drift uses co-prime durations so cycles never visually repeat: 23s, 29s, 31s, 37s, 41s, 43s. Background gradients use a separate set: 7s, 11s, 13s, 17s, 19s — producing 17+ minutes of variation.
 
 ### Breathing
 
-Mood orbs pulse with a subtle scale animation. Base period is `--duration-ambient` (4s). Energy level adjusts:
-
-| Mood | Period | Rationale |
-|------|--------|-----------|
-| Focus | 4s | Default, neutral |
-| Calm | 6s | Slower = calmer |
-| Late Night | 5s | Between calm and default |
-| Energize | 3s | Faster = more energy |
+Mood orbs pulse at rates matched to energy: focus 4s, late night 5s, calm 6s, energize 3s.
 
 ### Reduced Motion
 
-All animations are disabled when `prefers-reduced-motion: reduce` is active. Mood orbs become static. Backgrounds don't animate. Expansion transitions are instant.
+All animations disabled when `prefers-reduced-motion: reduce` is active. No loss of functionality.
 
 ---
 
@@ -190,37 +78,24 @@ All animations are disabled when `prefers-reduced-motion: reduce` is active. Moo
 
 Mobile-first. Three breakpoints.
 
-| Breakpoint | Width | Layout Changes |
-|------------|-------|----------------|
-| Base | < 641px | Two-row player bar, mobile mood sizes |
-| Tablet | 641px / 768px | Single-row player bar, larger mood orbs |
-| Desktop | 1024px | Full-size mood orbs, wider panels |
+| Breakpoint | Width | Key Change |
+|------------|-------|------------|
+| Base | < 641px | Two-row player bar (108px), mobile mood sizes |
+| Tablet | 641px / 768px | Single-row player bar (72px), larger orbs |
+| Desktop | 1024px | Full-size orbs, wider panels |
 
-### Player Bar
-
-The player bar is fixed to the bottom. On mobile, it uses a two-row layout (108px) — track info on top, controls below. At tablet width, it collapses to a single row (72px).
-
-```css
---player-height: 108px;  /* Mobile */
-/* Overridden to 72px at tablet breakpoint */
-```
-
-### Safe Areas
-
-Notched devices are handled with `env(safe-area-inset-*)` on the player bar and bottom panels.
+Safe area insets for notched devices on player bar and bottom panels.
 
 ---
 
 ## Z-Index Layers
-
-Explicit layering system. Panels slide up behind the player — the player stays on top for continuous control.
 
 | Token | Value | Element |
 |-------|-------|---------|
 | `--z-header` | 10 | Top nav |
 | `--z-panel` | 50 | Side panels |
 | `--z-drawer` | 60 | Bottom drawers |
-| `--z-player` | 100 | Player bar |
+| `--z-player` | 100 | Player bar (always on top) |
 | `--z-toast` | 400 | Toast notifications |
 | `--z-modal` | 500 | Modal overlays |
 
@@ -228,44 +103,24 @@ Explicit layering system. Panels slide up behind the player — the player stays
 
 ## Components
 
-### Mood Orbs
+**Mood Orbs** — Round buttons in elliptical galaxy layout (JS-positioned, CSS-drifted). Gradient fill, breathing pulse, orbital drift. Hover pauses animation, shows glow + play icon. Selection expands 5x and fades, dimming other orbs. Falls back to CSS grid.
 
-Round buttons displayed in an elliptical galaxy layout (positioned by JS, drifted by CSS). Each orb:
-- Gradient background from mood base to dim color
-- Breathing pulse animation (scale 1 → 1.03)
-- Orbital drift via `translate` property (GPU-accelerated)
-- Hover: glow shadow, paused animation, scale lift, play icon reveal
-- Selection: expansion animation (scale 5x, fade out), other orbs dim to 30%
-- Fallback: CSS grid layout when galaxy positioning isn't available
+**Player Bar** — Fixed bottom, glass morphism. Track info, play/pause, skip, progress rail (keyboard-navigable). Mood pill taps back to selector.
 
-### Player Bar
+**Drawers** — Bottom sheets for settings, about, lyrics. Slide up behind player bar. Glass background with scrim.
 
-Fixed bottom bar with glass morphism background. Contains:
-- Track info (title, artist, mood indicator pill)
-- Playback controls (play/pause, skip)
-- Progress rail with keyboard navigation (arrow keys, Home, End)
-- Mood indicator pill: tap to return to mood selector
+**Toasts** — Moodlet discovery and progressive skip friction. Auto-dismiss 10s. Above player bar.
 
-### Drawers
-
-Bottom sheets for settings, about, and lyrics. Slide up from bottom, sit behind player bar in z-order. Glass morphism background, scrim overlay on the content behind.
-
-### Toasts
-
-Notification system for moodlet discovery (suggests intensity adjustments after several tracks) and progressive skip friction (visual nudge on 3rd skip, philosophy toast on 4th+ skip). Auto-dismiss after 10 seconds. Positioned above the player bar.
-
-### Lyrics Panel
-
-Displays lyrics when available for the current track. Plain text, one line per lyric line, blank lines between stanzas. Only visible when track has lyrics and user hasn't disabled the feature.
+**Lyrics Panel** — Plain text display when available. One line per lyric, blank lines between stanzas.
 
 ---
 
 ## Accessibility
 
-- **Focus-visible:** All interactive elements have visible focus outlines via `:focus-visible`.
-- **Touch targets:** Minimum 44×44px (`--touch-target`) for all tappable elements.
-- **Safe area insets:** Player bar and bottom panels respect `env(safe-area-inset-bottom)` for notched devices.
-- **ARIA live regions:** Player state changes (track title, mood) announced to screen readers.
-- **Keyboard navigation:** Progress rail supports arrow keys, Home, End. Mood orbs are focusable buttons.
-- **Reduced motion:** All animations disabled. No loss of functionality.
-- **Color contrast:** Semantic text tokens maintain WCAG AA contrast in both themes.
+- `:focus-visible` outlines on all interactive elements
+- 44×44px minimum touch targets (`--touch-target`)
+- `env(safe-area-inset-bottom)` for notched devices
+- ARIA live regions for player state changes
+- Keyboard navigation on progress rail and mood orbs
+- `prefers-reduced-motion` disables all animation
+- WCAG AA contrast in both themes
