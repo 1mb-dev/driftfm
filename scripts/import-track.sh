@@ -125,22 +125,33 @@ TEMP_PATH="${TEMP_DIR}/${TEMP_FILENAME}"
 # Derive title from filename if not provided
 if [[ -z "$TITLE" ]]; then
     BASENAME=$(basename "$INPUT_FILE")
-    # Remove extension and clean up
     TITLE="${BASENAME%.*}"
-    # Remove common suffixes like (1), _timestamp, etc.
-    TITLE=$(echo "$TITLE" | sed -E 's/ \([0-9]+\)$//' | sed -E 's/_[0-9]{10,}$//')
-    # Replace underscores/hyphens with spaces
-    TITLE=$(echo "$TITLE" | tr '_-' '  ' | sed 's/  */ /g')
+    # Strip trailing numeric IDs (e.g. -342438, _1623847200)
+    TITLE=$(echo "$TITLE" | sed -E 's/[-_][0-9]{5,}$//')
+    # Replace underscores/hyphens with spaces, collapse whitespace, title case
+    TITLE=$(echo "$TITLE" | tr '_-' '  ' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)}1')
 fi
 
 # Get duration
 DURATION=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 "$INPUT_FILE" | cut -d'.' -f1)
 
-# Read and clean lyrics if file provided
+# Auto-detect vocals and lyrics from companion .txt file
+# Convention: place a .txt file next to the .mp3 with the same name
+#   marmalade-411291.txt → vocals + lyrics
+#   running-night-393139.txt → vocals (empty file, no lyrics)
+#   ocean-waves.mp3 (no .txt) → instrumental
+if [[ -z "$LYRICS_FILE" ]]; then
+    AUTO_TXT="${INPUT_FILE%.*}.txt"
+    if [[ -f "$AUTO_TXT" ]]; then
+        LYRICS_FILE="$AUTO_TXT"
+    fi
+fi
+
+# Read lyrics and set vocals flag
 LYRICS=""
 if [[ -n "$LYRICS_FILE" && -f "$LYRICS_FILE" ]]; then
+    HAS_VOCALS=1
     LYRICS=$(cat "$LYRICS_FILE" | clean_lyrics)
-    HAS_VOCALS=1  # Assume vocals if lyrics provided
 fi
 
 # Display what we're importing
