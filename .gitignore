@@ -9,11 +9,12 @@ data/*.db-shm
 
 # Audio files (users provide their own)
 audio/tracks/**/*.mp3
+music/sample/*
+!music/sample/tracks.md
 
 # Environment
 .env
 .env.local
-.env.enc
 
 # OS
 .DS_Store
@@ -31,7 +32,6 @@ coverage.html
 
 # Build
 *.test
-.claude/
 
 # Planning
 todos/
