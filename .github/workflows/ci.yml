@@ -11,3 +11,5 @@ on:
 jobs:
   ci:
     uses: 1mb-dev/.github/.github/workflows/ci-go.yml@main
+    with:
+      go-versions: '["1.25"]'
