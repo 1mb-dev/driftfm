@@ -1,0 +1,23 @@
+#!/bin/bash
+# Tracked pre-commit hook. Activated by scripts/setup.sh (git config core.hooksPath scripts/hooks).
+# Local convenience only -- CI runs gitleaks server-side where it cannot be skipped.
+
+# Shadow-hook warning. core.hooksPath makes git ignore .git/hooks/ entirely, so an edit
+# landing there is silently dead -- enforcement disappears with no error.
+if [ -e ".git/hooks/pre-commit" ]; then
+    echo "warning: .git/hooks/pre-commit exists but is SHADOWED by core.hooksPath=scripts/hooks." >&2
+    echo "         Git is not running it. Port anything it contains here, then delete it." >&2
+fi
+
+# Staged-secret scan.
+# The [ -n ] guard is load-bearing. BSD xargs runs its command once even on empty input,
+# so an empty staged list became `grep -lE pattern` with no file operands, which reads
+# stdin, hits EOF and exits 0 -- reported to the user as "secrets detected" on a commit
+# staging nothing. A scanner that cries wolf teaches --no-verify, which disarms it entirely.
+patterns="password\s*[=:]\s*['\"][^'\"]{8,}['\"]|secret\s*[=:]\s*['\"][^'\"]{16,}['\"]|token\s*[=:]\s*['\"][^'\"]{20,}['\"]"
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+if [ -n "$staged" ] && echo "$staged" | xargs grep -lE "$patterns" 2>/dev/null; then
+    echo "Potential secrets detected in commit"
+    echo "Review files and remove sensitive data"
+    exit 1
+fi
