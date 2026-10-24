@@ -3,10 +3,16 @@ name: CI
 on:
   push:
     branches: [main]
-    paths-ignore: [docs/**]
   pull_request:
     branches: [main]
-    paths-ignore: [docs/**]
+  # A Dependabot auto-merge is pushed by GITHUB_TOKEN, which starts no push run, so main is
+  # unverified until the next daily run. Dispatch verifies it on demand.
+  schedule:
+    - cron: "23 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   ci:
